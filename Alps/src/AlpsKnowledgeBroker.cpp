@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #include "Alps.h"
@@ -37,7 +37,11 @@ AlpsKnowledgeBroker::AlpsKnowledgeBroker()
     needWorkingSubTree_(true),// Initially workingSubTree_ points to NULL
     nextIndex_(0),
     maxIndex_(INT_MAX),
+    solNum_(0),
     nodeProcessedNum_(0),
+    nodeBranchedNum_(0),
+    nodeDiscardedNum_(0),
+    systemNodeProcessed_(0),
     nodeLeftNum_(0),
     treeDepth_(0),
     bestSolDepth_(INT_MAX),
@@ -54,7 +58,6 @@ AlpsKnowledgeBroker::AlpsKnowledgeBroker()
     nodeMemSize_(0),
     nodeProcessingTime_(ALPS_NODE_PROCESS_TIME), // Positive
     largeSize_(100000),
-    systemNodeProcessed_(0),
     numNodeLog_(0)
 {
     registerClass(AlpsKnowledgeTypeSubTree, new AlpsSubTree(this));

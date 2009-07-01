@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsTreeNode_h_
@@ -189,6 +189,8 @@ class AlpsTreeNode : public AlpsKnowledge {
 	return status_ == AlpsNodeStatusBranched; }
     inline bool isFathomed() const  {
 	return status_ == AlpsNodeStatusFathomed; }
+    inline bool isDiscarded() const  {
+	return status_ == AlpsNodeStatusDiscarded; }
     ///@}
     
     /** Query/set node in-process indicator. */

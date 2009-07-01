@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsKnowledgeBroker_h_
@@ -112,8 +112,17 @@ class AlpsKnowledgeBroker {
     /** Secondary timer. */
     AlpsTimer tempTimer_;
 
-    /** The number of nodes have been processed. */
+    /** The number of solutions found. */
+    int solNum_;
+
+    /** The number of nodes that have been processed. */
     int nodeProcessedNum_;
+
+    /** The number of nodes that have been branched. */
+    int nodeBranchedNum_;
+
+    /** The number of nodes that have been discarded before processing. */
+    int nodeDiscardedNum_;
 
     /** To record how many nodes processed by the system
         (used in parallel code). */
@@ -425,6 +434,16 @@ class AlpsKnowledgeBroker {
     /** Query the number of node processed by this process. */
     int getNumNodesProcessed() const {
 	return nodeProcessedNum_;
+    }
+
+    /** Query the number of node processed by this process. */
+    int getNumNodesBranched() const {
+	return nodeBranchedNum_;
+    }
+
+    /** Query the number of node processed by this process. */
+    int getNumNodesDiscarded() const {
+	return nodeDiscardedNum_;
     }
 
     /** Query the number of node processed by the system. */

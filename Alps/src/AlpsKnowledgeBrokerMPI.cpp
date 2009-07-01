@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #include <algorithm>
@@ -250,10 +250,14 @@ AlpsKnowledgeBrokerMPI::masterMain(AlpsTreeNode* root)
 	model_->AlpsPar()->entry(AlpsParams::interClusterBalance);
     const bool intraCB = 
 	model_->AlpsPar()->entry(AlpsParams::intraClusterBalance);
+
     const int smallSize = 
 	model_->AlpsPar()->entry(AlpsParams::smallSize);
+
     const int nodeLimit = 
 	model_->AlpsPar()->entry(AlpsParams::nodeLimit);
+    const int solLimit = model_->AlpsPar()->entry(AlpsParams::solLimit);
+    
     const double zeroLoad = 
 	model_->AlpsPar()->entry(AlpsParams::zeroLoad);
 
@@ -263,7 +267,7 @@ AlpsKnowledgeBrokerMPI::masterMain(AlpsTreeNode* root)
         userBalancePeriod_ = true;
     }
     else {
-        masterBalancePeriod_ = -masterBalancePeriod_ ;
+        masterBalancePeriod_ = -masterBalancePeriod_;
     }
     
     largeSize_ = model_->AlpsPar()->entry(AlpsParams::largeSize);
@@ -345,7 +349,7 @@ AlpsKnowledgeBrokerMPI::masterMain(AlpsTreeNode* root)
     }
 
     MPI_Barrier(MPI_COMM_WORLD); // Sync before rampup    
-
+    
     //======================================================
     // Master's Ramp-up.
     //======================================================
@@ -500,10 +504,23 @@ AlpsKnowledgeBrokerMPI::masterMain(AlpsTreeNode* root)
 		}
                 systemWorkQuantityForce_ = systemWorkQuantity_;
             }
-            else if (allWorkerReported && allHubReported_ && 
-                     (systemNodeProcessed_ >= nodeLimit)) {
+            else if ( allWorkerReported && allHubReported_ && 
+		      ((systemNodeProcessed_ >= nodeLimit) ||
+		       (getNumKnowledges(AlpsKnowledgeTypeSolution)+solNum_ >= 
+			solLimit)) ) {
                 forceTerminate_ = true;
-                setExitStatus(AlpsExitStatusNodeLimit);
+		if (systemNodeProcessed_ >= nodeLimit) {
+		    setExitStatus(AlpsExitStatusNodeLimit);
+		    messageHandler()->message(ALPS_TERM_FORCE_NODE, messages())
+			<< nodeLimit << CoinMessageEol;
+		}
+		else {
+		    //std::cout << "num solution = " << getNumKnowledges(AlpsKnowledgeTypeSolution) << std::endl;
+		    setExitStatus(AlpsExitStatusSolLimit);
+		    messageHandler()->message(ALPS_TERM_FORCE_SOL, messages())
+			<< solLimit << CoinMessageEol;
+		}
+		
                 masterForceHubTerm();
                 hubForceWorkerTerm();
 		if (msgLevel_ > 0) {
@@ -528,8 +545,6 @@ AlpsKnowledgeBrokerMPI::masterMain(AlpsTreeNode* root)
 			    << timer_.getWallClock()
 			    << CoinMessageEol; 
 		    }
-		   messageHandler()->message(ALPS_TERM_FORCE_NODE, messages())
-		     << nodeLimit << CoinMessageEol;
 		}
                 systemWorkQuantityForce_ = systemWorkQuantity_;
             }
@@ -3236,6 +3251,7 @@ AlpsKnowledgeBrokerMPI::unpackSetIncumbent(char*& bufLarge, MPI_Status* status)
     // Assume minimization
     if (incVal < incumbentValue_) {
         // Better solution 
+	++solNum_;
 	incumbentValue_ = incVal;
 	incumbentID_ = incID;
 	accept = true;
@@ -3252,7 +3268,7 @@ AlpsKnowledgeBrokerMPI::unpackSetIncumbent(char*& bufLarge, MPI_Status* status)
 	//updateIncumbent_ = true;        // The incumbent value is updated. 
     } 
     else if(incVal == incumbentValue_ ) {
-	   
+	++solNum_;	   
 	if (incID < incumbentID_) {     // So that all process consistant 
 	    incumbentValue_ = incVal;
 	    incumbentID_ = incID;
@@ -3538,8 +3554,7 @@ void
 AlpsKnowledgeBrokerMPI::sendIncumbent()
 {
     int position = 0;
-    int size = 
-	model_->AlpsPar()->entry(AlpsParams::smallSize);
+    int size = model_->AlpsPar()->entry(AlpsParams::smallSize);
     
     int mySeq = rankToSequence(incumbentID_, globalRank_);
     int leftSeq = leftSequence(mySeq, processNum_);
@@ -3565,7 +3580,6 @@ AlpsKnowledgeBrokerMPI::sendIncumbent()
 #endif
 	MPI_Isend(smallBuffer_, position, MPI_PACKED, leftRank, 
                   AlpsMsgIncumbentTwo, MPI_COMM_WORLD, &forwardRequestL_);
-	incSendCount("sendIncumbent()");
     }
     
     if (rightSeq != -1) {
@@ -3577,6 +3591,17 @@ AlpsKnowledgeBrokerMPI::sendIncumbent()
 #endif
 	MPI_Isend(smallBuffer_, position, MPI_PACKED, rightRank, 
                   AlpsMsgIncumbentTwo, MPI_COMM_WORLD, &forwardRequestR_);
+    }
+
+    if (leftSeq != -1) {
+        MPI_Status sentStatusL;
+        MPI_Wait(&forwardRequestL_, &sentStatusL);
+	incSendCount("sendIncumbent()");
+    }
+    
+    if (rightSeq != -1) {
+        MPI_Status sentStatusR;
+        MPI_Wait(&forwardRequestR_, &sentStatusR);
 	incSendCount("sendIncumbent()");
     }
 }
@@ -5045,6 +5070,20 @@ AlpsKnowledgeBrokerMPI::searchLog()
 			<< CoinMessageEol;
 		}
             }
+            else if (getSolStatus() == AlpsExitStatusSolLimit) {
+		if (forceTerminate_) {
+		    messageHandler()->message(ALPS_T_SOL_LIMIT, messages())
+			<< systemNodeProcessed_ 
+			<< static_cast<int>(systemWorkQuantityForce_) 
+			<< CoinMessageEol;
+		}
+		else {
+		    messageHandler()->message(ALPS_T_SOL_LIMIT, messages())
+			<< systemNodeProcessed_ 
+			<< static_cast<int>(systemWorkQuantity_) 
+			<< CoinMessageEol;
+		}
+            }
             else if (getSolStatus() == AlpsExitStatusTimeLimit) {
 #if 0
 		std::cout << "------ forceTerminate_=" << forceTerminate_ 
@@ -5245,6 +5284,9 @@ AlpsKnowledgeBrokerMPI::doOneUnitWork(int unitWork,
     
     AlpsReturnStatus rCode = AlpsReturnStatusOk;
 
+    int numNodesBranched = 0;  /* Output */
+    int numNodesDiscarded = 0; /* Output */
+        
     numNodesProcessed = 0; 
     
     if( !workingSubTree_ && !(subTreePool_->hasKnowledge()) ) {
@@ -5256,9 +5298,11 @@ AlpsKnowledgeBrokerMPI::doOneUnitWork(int unitWork,
         deleteSubTrees();
         return rCode;
     }
+#if 1
     
     if ( ! needWorkingSubTree_ )  {
         // Already has a subtree working on.
+        
         
         assert(workingSubTree_);
         rCode = workingSubTree_->exploreUnitWork(true, /* leaveAsIt*/
@@ -5266,6 +5310,8 @@ AlpsKnowledgeBrokerMPI::doOneUnitWork(int unitWork,
                                                  unitTime,
                                                  exitStatus,
                                                  numNodesProcessed,
+                                                 numNodesBranched,  /* Output */
+                                                 numNodesDiscarded, /* Output */
                                                  treeDepth_,
                                                  betterSolution);
         
@@ -5292,6 +5338,8 @@ AlpsKnowledgeBrokerMPI::doOneUnitWork(int unitWork,
                                                  unitTime,
                                                  exitStatus,
                                                  numNodesProcessed,
+                                                 numNodesBranched,  /* Output */
+                                                 numNodesDiscarded, /* Output */
                                                  treeDepth_,
                                                  betterSolution);
         
@@ -5307,7 +5355,7 @@ AlpsKnowledgeBrokerMPI::doOneUnitWork(int unitWork,
             workingSubTree_ = 0;
         }
     }
-
+#endif
     return rCode;
 }
 
@@ -5719,9 +5767,12 @@ AlpsKnowledgeBrokerMPI::forwardModelKnowledge()
         int leftRank = sequenceToRank(modelGenID_, leftSeq);
         MPI_Isend(largeBuffer_, modelGenPos_, MPI_PACKED, leftRank, 
 		  AlpsMsgModelGenSearch, MPI_COMM_WORLD, &forwardRequestL_);
+#if 0
         std::cout << "++++ forwardModelKnowledge: leftRank = " 
                   << leftRank << std::endl;
-        
+#endif
+        MPI_Status sentStatusL;
+        MPI_Wait(&forwardRequestL_, &sentStatusL);   
         incSendCount("forwardModelKnowledge during search");        
     }
     
@@ -5738,10 +5789,14 @@ AlpsKnowledgeBrokerMPI::forwardModelKnowledge()
 	    }
 	}
         int rightRank = sequenceToRank(modelGenID_, rightSeq);
+#if 0
         std::cout << "++++ forwardModelKnowledge: rightRank = " 
                   << rightRank << std::endl;
+#endif
         MPI_Isend(largeBuffer_, modelGenPos_, MPI_PACKED, rightRank, 
 		  AlpsMsgModelGenSearch, MPI_COMM_WORLD, &forwardRequestR_);
+        MPI_Status sentStatusR;
+        MPI_Wait(&forwardRequestR_, &sentStatusR);
         incSendCount("forwardModelKnowledge during search");
     }
 }
@@ -5845,6 +5900,8 @@ AlpsKnowledgeBrokerMPI::sendModelKnowledge(MPI_Comm comm, int receiver)
 	    //     AlpsMsgModelGenSearch, comm);
 	    MPI_Isend(largeBuffer2_, position, MPI_PACKED, leftRank,
 		      AlpsMsgModelGenSearch, comm, &modelKnowRequestL_);
+            MPI_Status sentStatusL;
+            MPI_Wait(&forwardRequestL_, &sentStatusL);
             incSendCount("sendModelKnowledge during search");        
         }
         
@@ -5866,6 +5923,8 @@ AlpsKnowledgeBrokerMPI::sendModelKnowledge(MPI_Comm comm, int receiver)
 	    //     AlpsMsgModelGenSearch, comm);
 	    MPI_Isend(largeBuffer2_, position, MPI_PACKED, rightRank,
 		      AlpsMsgModelGenSearch, comm, &modelKnowRequestR_);
+            MPI_Status sentStatusR;
+            MPI_Wait(&forwardRequestR_, &sentStatusR);
 	    incSendCount("sendModelKnowledge during search");
         }
     }

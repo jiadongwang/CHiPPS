@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsSubTree_h_
@@ -90,6 +90,11 @@ class AlpsSubTree : public AlpsKnowledge {
 
     /** This function replaces \c oldNode with \c newNode in the tree. */
     void replaceNode(AlpsTreeNode* oldNode, AlpsTreeNode* newNode);
+
+    /** Fathom all nodes on this subtree. 
+     *  Set activeNode_ and root_ to NULL.
+     */
+    void fathomAllNodes();
 
  public:
     
@@ -233,23 +238,27 @@ class AlpsSubTree : public AlpsKnowledge {
 	number of nodes or time, depending on which one reach first. 
 	Only for serial code. */
     virtual AlpsReturnStatus exploreSubTree(AlpsTreeNode* root,
-					  int nodeLimit,  
-					  double timeLimit,
-					  int & numNodesProcesse, /* Output */
-					  int & depth);           /* Output */
+                                            int nodeLimit,  
+                                            double timeLimit,
+                                            int & numNodesProcessed, /* Output */
+                                            int & numNodesBranched,  /* Output */
+                                            int & numNodesDiscarded, /* Output */
+                                            int & depth);            /* Output */
     
     /** Explore the subtree for certain amount of work/time. 
 	leaveAsIt means exit immediately after reseach limits:
 	do not put activeNode_ in pool, do not move nodes in 
 	divePool_ in regular pool.
     */
-    AlpsReturnStatus exploreUnitWork(bool leaveAsIt, 
-				   int unitWork,
-                                   double unitTime,
-                                   AlpsExitStatus & solStatus,/*not for parallel*/
-                                   int & numNodesProcessed, /* Output */
-                                   int & depth,             /* Output */
-                                   bool & betterSolution);  /* Output */
+    AlpsReturnStatus exploreUnitWork(bool leaveAsIt,
+                                     int unitWork,
+                                     double unitTime,
+                                     AlpsExitStatus & solStatus,/*not for parallel*/
+                                     int & numNodesProcessed, /* Output */
+                                     int & numNodesBranched,  /* Output */
+                                     int & numNodesDiscarded, /* Output */
+                                     int & depth,             /* Output */
+                                     bool & betterSolution);  /* Output */
     
     /** Generate required number (specified by a parameter) of nodes. 
 	This function is used by master and hubs. */

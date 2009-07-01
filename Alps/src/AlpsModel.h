@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsModel_h
@@ -110,6 +110,9 @@ class AlpsModel : public AlpsKnowledge {
     /** Node log. */
     virtual void nodeLog(AlpsTreeNode *node, bool force);
 
+    /** Return true if all nodes on this process can be fathomed.*/
+    virtual bool fathomAllNodes() { return false; }
+    
     //------------------------------------------------------
     // For parallel.
     //------------------------------------------------------

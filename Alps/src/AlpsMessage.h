@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsMessage_h_
@@ -78,6 +78,7 @@ enum ALPS_Message
     ALPS_STATIC_BALANCE_BEG,
     ALPS_STATIC_BALANCE_END,
     ALPS_TERM_FORCE_NODE,
+    ALPS_TERM_FORCE_SOL,
     ALPS_TERM_FORCE_TIME,
     ALPS_TERM_HUB_INFORM,
     ALPS_TERM_MASTER_START,
@@ -89,6 +90,7 @@ enum ALPS_Message
     ALPS_T_NODE_LIMIT,
     ALPS_T_NO_MEMORY,
     ALPS_T_OPTIMAL,
+    ALPS_T_SOL_LIMIT,
     ALPS_T_TIME_LIMIT,
     // Following are for serial only
     ALPS_S_NODE_COUNT,
@@ -97,6 +99,8 @@ enum ALPS_Message
     ALPS_S_FINAL_SOL,
     ALPS_S_FINAL_NO_SOL,
     ALPS_S_FINAL_NODE_PROCESSED,
+    ALPS_S_FINAL_NODE_BRANCHED,
+    ALPS_S_FINAL_NODE_DISCARDED,
     ALPS_S_FINAL_NODE_LEFT,
     ALPS_S_FINAL_DEPTH,
     ALPS_S_FINAL_CPU,

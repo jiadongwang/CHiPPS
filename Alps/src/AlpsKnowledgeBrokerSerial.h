@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsKnowledgeBrokerSerial_h_
@@ -44,7 +44,7 @@ class AlpsKnowledgeBrokerSerial : public AlpsKnowledgeBroker {
 	AlpsKnowledgeBroker() 
 	{} 
 
-    /** Userful constructor. 
+    /** Useful constructor. 
 	Note need read in parameters and data seperately. */
     AlpsKnowledgeBrokerSerial(AlpsModel& model) 
 	: 

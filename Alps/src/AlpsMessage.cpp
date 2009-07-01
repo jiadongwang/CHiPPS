@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #include "AlpsMessage.h"
@@ -61,7 +61,7 @@ static Alps_message us_english[] =
     {ALPS_MSG_HOW, 100, 3, "Process[%d] %s count %d in %s"},
     {ALPS_NODE_COUNT, 104, 3, "Worker[%d] processed %d nodes, %d nodes are left"},
     {ALPS_NODE_MEM_SIZE, 106, 1, "The memory size of a node is about %d bytes"},
-    {ALPS_P_VERSION, 110, 1, "ALPS version 1.0 (Parallel, MPI)"},
+    {ALPS_P_VERSION, 110, 1, "ALPS version 1.1 (Parallel, MPI)"},
     {ALPS_PARAMFILE, 120, 1, "Parameter file: %s"},
     {ALPS_PEAK_MEMORY, 125, 1, "Peak memory usage: %.2f M"},
     {ALPS_RAMPUP_HUB, 130, 1, "Hub[%d]'s rampup took %g seconds to process %d nodes. Node pool has %d nodes"},
@@ -85,7 +85,8 @@ static Alps_message us_english[] =
     {ALPS_STATIC_BALANCE_BEG, 165, 1, "Starting %s"},
     {ALPS_STATIC_BALANCE_END, 166, 1, "Completed %s"},
     {ALPS_TERM_FORCE_NODE, 170, 1, "Master asked other processes to stop searching due to reaching node limt %d"},
-    {ALPS_TERM_FORCE_TIME, 172, 1, "Master asked other processes to stop searching due to reaching time limt %.2f seconds"},
+    {ALPS_TERM_FORCE_SOL, 174, 1, "Master asked other processes to stop searching due to reaching solution limt %d"},
+    {ALPS_TERM_FORCE_TIME, 176, 1, "Master asked other processes to stop searching due to reaching time limt %.2f seconds"},
     {ALPS_TERM_HUB_INFORM, 180, 3, "Hub[%d] got instruction to %s"},
     {ALPS_TERM_MASTER_START, 190, 1, "Master[%d] is doing termination check"},
     {ALPS_TERM_MASTER_INFORM, 192, 1, "Master[%d] asked other processes to %s"},
@@ -96,18 +97,21 @@ static Alps_message us_english[] =
     {ALPS_T_NODE_LIMIT,204, 1, "Reached node limit. %d nodes processed, %d nodes left"},
     {ALPS_T_NO_MEMORY,206, 1, "Out of memory. %d nodes processed, %d nodes left"},
     {ALPS_T_OPTIMAL,208, 1, "Found an optimal solution. %d nodes processed, %d nodes left"},
+    {ALPS_T_SOL_LIMIT,210, 1, "Reached solution limit. %d nodes processed, %d nodes left"},
     {ALPS_T_TIME_LIMIT,230, 1, "Reached time limit. %d nodes processed, %d nodes left"},
     {ALPS_S_NODE_COUNT, 240, 1, "Processed %d nodes, has %d nodes, best relaxed %g, best feasible %g"},
     {ALPS_S_SEARCH_START, 250, 1, "Search solutions ..."},
     {ALPS_S_SEARCH_SOL, 255, 3, "Process %d found a better solution %g"},
     {ALPS_S_FINAL_SOL, 260, 1, "Quality of the best solution found: %g ; depth %d"},
     {ALPS_S_FINAL_NO_SOL, 264, 1, "No solution found"},
-    {ALPS_S_FINAL_NODE_PROCESSED, 268, 1, "Number of nodes processed: %d"},
+    {ALPS_S_FINAL_NODE_PROCESSED, 267, 1, "Number of nodes processed: %d"},
+    {ALPS_S_FINAL_NODE_BRANCHED, 268, 1, "Number of nodes branched: %d"},
+    {ALPS_S_FINAL_NODE_DISCARDED, 269, 1, "Number of nodes pruned before processing: %d"},
     {ALPS_S_FINAL_NODE_LEFT, 270, 1, "Number of nodes left: %d"},
     {ALPS_S_FINAL_DEPTH, 272, 1, "Tree depth: %d"},
     {ALPS_S_FINAL_CPU, 274, 1, "Search CPU time: %.2f seconds"},
     {ALPS_S_FINAL_WALLCLOCK, 278, 1, "Search wall-clock time: %.2f seconds"},
-    {ALPS_S_VERSION, 300, 1, "ALPS version 1.0 (Serial)"},
+    {ALPS_S_VERSION, 300, 1, "ALPS version 1.1 (Serial)"},
     {ALPS_DUMMY_END, 999999, 0, ""}
 };
 

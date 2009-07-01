@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #include "Alps.h"
@@ -227,7 +227,7 @@ void AlpsParams::setDefaultEntries() {
   setEntry(printSystemStatus, 1);
   setEntry(processNum, 2);
   setEntry(staticBalanceScheme, 1);  // Spiral
-  setEntry(searchStrategy, AlpsSearchTypeHybrid);  
+  setEntry(searchStrategy, AlpsSearchTypeBestFirst);  
   setEntry(searchStrategyRampUp, AlpsSearchTypeBestFirst);  
   setEntry(smallSize, 1024);      // 2^10
   setEntry(solLimit, ALPS_INT_MAX);

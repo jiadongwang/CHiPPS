@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #include "AlpsSearchStrategy.h"
@@ -45,8 +45,7 @@ AlpsNodeSelection::createNewNodes(AlpsSubTree *subTree, AlpsTreeNode *node)
     std::vector< CoinTriple<AlpsNodeDesc*, AlpsNodeStatus, double> > 
 	children = node->branch();
     subTree->createChildren(node, children);
-    /* No active node now. */
-    subTree->setActiveNode(0);
+    //subTree->setActiveNode(0);
 }
 
 //#############################################################################

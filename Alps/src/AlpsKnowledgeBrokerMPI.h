@@ -17,7 +17,7 @@
  *          Matthew Saltzman, Clemson University                             *
  *                                                                           * 
  *                                                                           *
- * Copyright (C) 2001-2008, Lehigh University, Yan Xu, and Ted Ralphs.       *
+ * Copyright (C) 2001-2009, Lehigh University, Yan Xu, and Ted Ralphs.       *
  *===========================================================================*/
 
 #ifndef AlpsKnowledgeBrokerMPI_h_
@@ -631,10 +631,18 @@ class AlpsKnowledgeBrokerMPI : public AlpsKnowledgeBroker {
 
     /** @name Report search results. */
     //@{
-    /** The process queries the quality of the incumbent it stores. */
+    /** The process queries the quality of the incumbent this process stores. */
     virtual double getIncumbentValue() const {
+        double bestObj = ALPS_OBJ_MAX;
+        if (AlpsKnowledgeBroker::hasKnowledge(AlpsKnowledgeTypeSolution)) {
+	    bestObj = getBestKnowledge(AlpsKnowledgeTypeSolution).second;
+            if (incumbentValue_ > bestObj) {
+                return bestObj;
+            }
+        }
 	return incumbentValue_;
     }
+ 
     /** The master queries the quality of the best solution it knowns. */
     virtual double getBestQuality() const {
 	if (globalRank_ == masterRank_) {
